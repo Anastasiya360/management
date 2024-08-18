@@ -1,0 +1,25 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: Anastasia
+      POSTGRES_PASSWORD: 3607244
+      POSTGRES_DB: management
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5430:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      test: [ "CMD-SHELL", "pg_isready -U postgres_user -d postgres_db" ]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    driver: local
