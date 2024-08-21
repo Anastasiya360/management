@@ -20,11 +20,13 @@ import java.util.Optional;
 public class TasksService {
     private TasksRepository tasksRepository;
     private UserRepository userRepository;
+    private CommentService commentService;
 
     @Autowired
-    public TasksService(TasksRepository tasksRepository, UserRepository userRepository) {
+    public TasksService(TasksRepository tasksRepository, UserRepository userRepository, CommentService commentService) {
         this.tasksRepository = tasksRepository;
         this.userRepository = userRepository;
+        this.commentService = commentService;
     }
 
     /**
@@ -76,10 +78,15 @@ public class TasksService {
      *
      * @return созданная задача
      */
-    public Tasks create(Tasks tasks) {
+    public Tasks create(Tasks tasks, Integer userId) {
         tasks.setId(null);
         tasks.setStatus("pending");
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = null;
+        if (userId == null) {
+            currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        } else {
+            currentUser = userRepository.findById(userId).orElseThrow();
+        }
         tasks.setAuthor(currentUser);
         checkParam(tasks);
         if (!EnumUtils.isValidEnum(Priority.class, tasks.getPriority())) {
@@ -152,6 +159,7 @@ public class TasksService {
             return tasksRepository.findTaskByExecutorSurname(userSurname, pageable).getContent();
         }
     }
+
     /**
      * Получение всех задач по автору задачи
      *

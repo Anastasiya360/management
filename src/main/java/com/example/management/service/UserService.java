@@ -26,6 +26,7 @@ public class UserService {
      * @return созданный пользователь
      */
     public User create(User user) {
+        user.setId(null);
         user.setRole("admin");
         if (user.getName() == null || user.getName().isBlank()) {
             throw new ApiException("Имя не передано", 400);
