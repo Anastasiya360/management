@@ -22,4 +22,14 @@ public interface TasksRepository extends JpaRepository<Tasks, Integer> {
             "         join management.users u on u.id = tasks.user_id_executor " +
             "         where u.surname like concat('%', :userSurname, '%')")
     Page<Tasks> findTaskByExecutorSurname (String userSurname, Pageable pageable);
+
+    @Query(nativeQuery = true, value = "select tasks.id, tasks.title, tasks.description, tasks.status, tasks.priority, tasks.user_id_author, tasks.user_id_executor from management.tasks" +
+            "         join management.users u on u.id = tasks.user_id_author " +
+            "         where u.surname like concat('%', :userSurname, '%')")
+    List<Tasks> findTaskByAuthorSurname (String userSurname);
+
+    @Query(nativeQuery = true, value = "select tasks.id, tasks.title, tasks.description, tasks.status, tasks.priority, tasks.user_id_author, tasks.user_id_executor from management.tasks" +
+            "         join management.users u on u.id = tasks.user_id_author " +
+            "         where u.surname like concat('%', :userSurname, '%')")
+    Page<Tasks> findTaskByAuthorSurname (String userSurname, Pageable pageable);
 }

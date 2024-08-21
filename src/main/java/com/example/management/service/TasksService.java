@@ -152,5 +152,17 @@ public class TasksService {
             return tasksRepository.findTaskByExecutorSurname(userSurname, pageable).getContent();
         }
     }
+    /**
+     * Получение всех задач по автору задачи
+     *
+     * @return список задач
+     */
+    public List<Tasks> findTaskByAuthorSurname(String userSurname, Pageable pageable) {
+        if (pageable == null) {
+            return tasksRepository.findTaskByAuthorSurname(userSurname);
+        } else {
+            return tasksRepository.findTaskByAuthorSurname(userSurname, pageable).getContent();
+        }
+    }
 }
 

@@ -80,5 +80,19 @@ public class TasksController {
             return tasksService.findTaskByExecutorSurname(userSurname, null);
         }
         return tasksService.findTaskByExecutorSurname(userSurname, PageRequest.of(pageNum, pageSize));
+
+    }
+
+    @Operation(
+            summary = "Get information about all tasks by author"
+    )
+
+    @GetMapping(path = "task/get/all/by/author")
+    public List<Tasks> findTaskByAuthorSurname(@RequestParam String userSurname, @RequestParam(required = false) Integer pageNum,
+                                               @RequestParam(required = false) Integer pageSize) {
+        if (pageNum == null || pageSize == null) {
+            return tasksService.findTaskByAuthorSurname(userSurname, null);
+        }
+        return tasksService.findTaskByAuthorSurname(userSurname, PageRequest.of(pageNum, pageSize));
     }
 }
