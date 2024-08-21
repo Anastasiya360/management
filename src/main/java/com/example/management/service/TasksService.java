@@ -9,6 +9,7 @@ import com.example.management.repository.TasksRepository;
 import com.example.management.repository.UserRepository;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,11 @@ public class TasksService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Проверка существует ли задача по id
+     *
+     * @return null если существует
+     */
     public Tasks existById(Integer id) {
         if (!tasksRepository.existsById(id)) {
             throw new ApiException("Задача не найдена", 404);
@@ -33,7 +39,9 @@ public class TasksService {
         return null;
     }
 
-
+    /**
+     * Удаление задачи по id
+     */
     public void deleteById(Integer taskId) {
         Optional<Tasks> tasks = tasksRepository.findById(taskId);
         if (existById(taskId) == null) {
@@ -45,6 +53,9 @@ public class TasksService {
         tasksRepository.deleteById(taskId);
     }
 
+    /**
+     * Проверка заполняемых параметров в задачу
+     */
     public void checkParam(Tasks tasks) {
         if (tasks.getTitle() == null || tasks.getTitle().isBlank()) {
             throw new ApiException("Заголовок не передан", 400);
@@ -60,6 +71,11 @@ public class TasksService {
         }
     }
 
+    /**
+     * Создание задачи
+     *
+     * @return созданная задача
+     */
     public Tasks create(Tasks tasks) {
         tasks.setId(null);
         tasks.setStatus("pending");
@@ -72,16 +88,30 @@ public class TasksService {
         return tasksRepository.save(tasks);
     }
 
-    public List<Tasks> getAll() {
-        return tasksRepository.findAll();
+    /**
+     * Получение всех задач
+     *
+     * @return все задачи
+     */
+    public List<Tasks> getAll(Pageable pageable) {
+        if (pageable == null) {
+            return tasksRepository.findAll();
+        } else {
+            return tasksRepository.findAll(pageable).getContent();
+        }
     }
 
+    /**
+     * Изменение статуса задачи, только для исполнтелей задачи
+     *
+     * @return задача с измененным статусом
+     */
     public Tasks changeStatus(Integer taskId, String status) {
         Optional<Tasks> task = tasksRepository.findById(taskId);
         if (task.isEmpty()) {
             throw new ApiException("Задача не найдена", 404);
         }
-       User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!currentUser.getId().equals(task.get().getExecutor().getId())) {
             throw new ApiException("Пользователь не исполнитель задачи", 403);
         }
@@ -92,6 +122,11 @@ public class TasksService {
         return tasksRepository.save(task.get());
     }
 
+    /**
+     * Назначение исполнителя задачи, только для автора задачи
+     *
+     * @return задача с назначенным исполнителем
+     */
     public Tasks appointmentExecutor(Integer taskId, Integer executorId) {
         Optional<Tasks> task = tasksRepository.findById(taskId);
         if (task.isEmpty()) {
@@ -105,5 +140,17 @@ public class TasksService {
         return tasksRepository.save(task.get());
     }
 
+    /**
+     * Получение всех задач по исполнтелю задачи
+     *
+     * @return список задач
+     */
+    public List<Tasks> findTaskByExecutorSurname(String userSurname, Pageable pageable) {
+        if (pageable == null) {
+            return tasksRepository.findTaskByExecutorSurname(userSurname);
+        } else {
+            return tasksRepository.findTaskByExecutorSurname(userSurname, pageable).getContent();
+        }
+    }
 }
 
