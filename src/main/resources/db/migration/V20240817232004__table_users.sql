@@ -5,6 +5,7 @@ create table management.users
             primary key,
     name     varchar not null,
     surname  varchar,
+    role     varchar,
     email    varchar not null,
     password varchar not null
 );

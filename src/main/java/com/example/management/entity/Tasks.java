@@ -2,6 +2,8 @@ package com.example.management.entity;
 
 import com.example.management.dto.UserDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,9 +48,13 @@ public class Tasks implements Serializable {
     private User executor;
 
     @Transient
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private UserDto userAuthorDto;
 
     @Transient
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private UserDto userExecutorDto;
 
     @PostLoad

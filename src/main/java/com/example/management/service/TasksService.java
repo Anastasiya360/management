@@ -1,14 +1,19 @@
 package com.example.management.service;
 
 import com.example.management.entity.Tasks;
+import com.example.management.entity.User;
 import com.example.management.enums.Priority;
 import com.example.management.enums.TaskStatus;
+import com.example.management.exceptoin.ApiException;
 import com.example.management.repository.TasksRepository;
 import com.example.management.repository.UserRepository;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TasksService {
@@ -21,70 +26,84 @@ public class TasksService {
         this.userRepository = userRepository;
     }
 
-    public ResponseEntity<?> existById(Integer id) {
+    public Tasks existById(Integer id) {
         if (!tasksRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
+            throw new ApiException("Задача не найдена", 404);
         }
         return null;
     }
 
-    public ResponseEntity<?> deleteById(Integer id) {
-        ResponseEntity<?> responseEntity = existById(id);
-        if (responseEntity != null) {
-            return responseEntity;
+
+    public void deleteById(Integer taskId) {
+        Optional<Tasks> tasks = tasksRepository.findById(taskId);
+        if (existById(taskId) == null) {
+            throw new ApiException("Задача не найдена", 404);
         }
-        tasksRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() == tasks.get().getAuthor().getId()) {
+            throw new ApiException("Пользователь не автор задачи", 403);
+        }
+        tasksRepository.deleteById(taskId);
     }
 
-    public ResponseEntity<?> checkParam(Tasks tasks) {
+    public void checkParam(Tasks tasks) {
         if (tasks.getTitle() == null || tasks.getTitle().isBlank()) {
-            return ResponseEntity.badRequest().body("Заголовок не передан");
+            throw new ApiException("Заголовок не передан", 400);
         }
         if (tasks.getDescription() == null || tasks.getDescription().isBlank()) {
-            return ResponseEntity.badRequest().body("Описание не передано");
+            throw new ApiException("Описание не передано", 400);
         }
-//        if (tasks.getStatus() == null || tasks.getStatus().isBlank()) {
-//            return ResponseEntity.badRequest().body("Статус не передан");
-//        }
         if (tasks.getPriority() == null || tasks.getPriority().isBlank()) {
-            return ResponseEntity.badRequest().body("Приоритет не передан");
+            throw new ApiException("Приоритет не передан", 400);
         }
-        if (tasks.getAuthor() == null) {
-            return ResponseEntity.badRequest().body("Автор не передан");
+        if (!userRepository.existsById(tasks.getAuthor().getId())) {
+            throw new ApiException("Пользователь(автор) не найден", 404);
         }
-        if (!userRepository.existsById(tasks.getAuthor().getId())){
-            return ResponseEntity.badRequest().body("Пользователь(автор) не найден");
-        }
-        if (!userRepository.existsById(tasks.getExecutor().getId())){
-            return ResponseEntity.badRequest().body("Пользователь(исполнитель) не найден");
-        }
-        return null;
-    }
-    public ResponseEntity<?> create(Tasks tasks) {
-        tasks.setId(null);
-        tasks.setStatus("pending");
-        ResponseEntity<?> responseEntity = checkParam(tasks);
-        if (responseEntity != null) {
-            return responseEntity;
-        }
-        if (!EnumUtils.isValidEnum(Priority.class, tasks.getPriority())) {
-            return ResponseEntity.badRequest().body("Приоритет задачи задан не верно");
-        }
-        return ResponseEntity.ok(tasksRepository.save(tasks));
-    }
-    public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(tasksRepository.findAll());
     }
 
-    public ResponseEntity<?> changeStatus(Tasks tasks){
-        ResponseEntity<?> responseEntity = checkParam(tasks);
-        if (responseEntity != null) {
-            return responseEntity;
+    public Tasks create(Tasks tasks) {
+        tasks.setId(null);
+        tasks.setStatus("pending");
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        tasks.setAuthor(currentUser);
+        checkParam(tasks);
+        if (!EnumUtils.isValidEnum(Priority.class, tasks.getPriority())) {
+            throw new ApiException("Приоритет задачи задан не верно", 400);
         }
-        if (!EnumUtils.isValidEnum(TaskStatus.class, tasks.getStatus())) {
-            return ResponseEntity.badRequest().body("Статус задачи задан не верно");
-        }
-        return ResponseEntity.ok(tasksRepository.save(tasks));
+        return tasksRepository.save(tasks);
     }
+
+    public List<Tasks> getAll() {
+        return tasksRepository.findAll();
+    }
+
+    public Tasks changeStatus(Integer taskId, String status) {
+        Optional<Tasks> task = tasksRepository.findById(taskId);
+        if (task.isEmpty()) {
+            throw new ApiException("Задача не найдена", 404);
+        }
+       User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!currentUser.getId().equals(task.get().getExecutor().getId())) {
+            throw new ApiException("Пользователь не исполнитель задачи", 403);
+        }
+        if (!EnumUtils.isValidEnum(TaskStatus.class, status)) {
+            throw new ApiException("Статус задачи задан не верно", 400);
+        }
+        task.get().setStatus(status);
+        return tasksRepository.save(task.get());
+    }
+
+    public Tasks appointmentExecutor(Integer taskId, Integer executorId) {
+        Optional<Tasks> task = tasksRepository.findById(taskId);
+        if (task.isEmpty()) {
+            throw new ApiException("Задача не найдена", 404);
+        }
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!currentUser.getId().equals(task.get().getAuthor().getId())) {
+            throw new ApiException("Пользователь не автор задачи", 403);
+        }
+        task.get().setExecutor(userRepository.findById(executorId).get());
+        return tasksRepository.save(task.get());
+    }
+
 }
+
