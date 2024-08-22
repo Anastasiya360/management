@@ -28,7 +28,7 @@ public class TasksController {
     )
     @DeleteMapping(path = "task/delete/{id}")
     public void deleteById(@PathVariable Integer id) {
-
+        tasksService.deleteById(id);
     }
 
     @Operation(
@@ -36,7 +36,7 @@ public class TasksController {
     )
     @PostMapping(path = "task/create")
     public Tasks create(@RequestBody Tasks tasks) {
-        return tasksService.create(tasks, null);
+        return tasksService.create(tasks);
     }
 
     @Operation(

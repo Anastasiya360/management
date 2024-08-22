@@ -47,13 +47,12 @@ public class Tasks implements Serializable {
     @ManyToOne(targetEntity = User.class, cascade = CascadeType.DETACH)
     private User executor;
 
-    public Tasks(Integer id, String title, String description, String status, String priority, User author) {
+    public Tasks(Integer id, String title, String description, String status, String priority) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.status = status;
         this.priority = priority;
-        this.author = author;
     }
 
     @Transient

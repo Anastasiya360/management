@@ -19,26 +19,13 @@ import java.util.Optional;
 @Service
 public class TasksService {
     private TasksRepository tasksRepository;
+
     private UserRepository userRepository;
-    private CommentService commentService;
 
     @Autowired
-    public TasksService(TasksRepository tasksRepository, UserRepository userRepository, CommentService commentService) {
+    public TasksService(TasksRepository tasksRepository, UserRepository userRepository) {
         this.tasksRepository = tasksRepository;
         this.userRepository = userRepository;
-        this.commentService = commentService;
-    }
-
-    /**
-     * Проверка существует ли задача по id
-     *
-     * @return null если существует
-     */
-    public Tasks existById(Integer id) {
-        if (!tasksRepository.existsById(id)) {
-            throw new ApiException("Задача не найдена", 404);
-        }
-        return null;
     }
 
     /**
@@ -46,17 +33,17 @@ public class TasksService {
      */
     public void deleteById(Integer taskId) {
         Optional<Tasks> tasks = tasksRepository.findById(taskId);
-        if (existById(taskId) == null) {
+        if (tasks.isEmpty()) {
             throw new ApiException("Задача не найдена", 404);
         }
-        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() == tasks.get().getAuthor().getId()) {
+        if (!((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId().equals(tasks.get().getAuthor().getId())) {
             throw new ApiException("Пользователь не автор задачи", 403);
         }
         tasksRepository.deleteById(taskId);
     }
 
     /**
-     * Проверка заполняемых параметров в задачу
+     * Проверка параметров задачу
      */
     public void checkParam(Tasks tasks) {
         if (tasks.getTitle() == null || tasks.getTitle().isBlank()) {
@@ -78,15 +65,10 @@ public class TasksService {
      *
      * @return созданная задача
      */
-    public Tasks create(Tasks tasks, Integer userId) {
+    public Tasks create(Tasks tasks) {
         tasks.setId(null);
         tasks.setStatus("pending");
-        User currentUser = null;
-        if (userId == null) {
-            currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        } else {
-            currentUser = userRepository.findById(userId).orElseThrow();
-        }
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         tasks.setAuthor(currentUser);
         checkParam(tasks);
         if (!EnumUtils.isValidEnum(Priority.class, tasks.getPriority())) {
