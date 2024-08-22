@@ -1,10 +1,12 @@
 package com.example.management;
 
+import com.example.management.entity.Comment;
 import com.example.management.entity.Tasks;
 import com.example.management.entity.User;
 import com.example.management.exceptoin.ApiException;
 import com.example.management.repository.TasksRepository;
 import com.example.management.repository.UserRepository;
+import com.example.management.service.CommentService;
 import com.example.management.service.TasksService;
 import com.example.management.service.UserService;
 import org.junit.jupiter.api.Assertions;
@@ -28,11 +30,15 @@ class ManagementApplicationTests {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private CommentService commentService;
+
     @MockBean
     private UserRepository userRepository;
 
     @MockBean
     private TasksRepository tasksRepository;
+
 
     @Test
     void testTaskDeleteNotFound() {
@@ -371,13 +377,82 @@ class ManagementApplicationTests {
 
     @Test
     void testUserGetByEmailSuccess() {
-        Mockito.when(userRepository.findUserByEmail("123@gmail.com")).thenReturn(null);
+        User user = new User("Name", "Surname", "123@gmail.com", "12345678");
+        Mockito.when(userRepository.findUserByEmail("123@gmail.com")).thenReturn(user);
 
+        Assertions.assertDoesNotThrow(() -> {
+            userRepository.findUserByEmail("123@gmail.com");
+        });
+    }
+
+    @Test
+    void testCommentCreateDescriptionNull() {
+        Tasks tasks = new Tasks();
+        tasks.setId(2);
+        User author = new User();
+        author.setId(4);
+        Comment comment = new Comment(author,null,2);
+        mockSecurity(4);
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            userService.getByUserEmail("123@gmail.com");
+            commentService.create(comment);
+        });
+        Assertions.assertEquals(400, thrown.getStatusCode());
+        Assertions.assertEquals("Описание не передано", thrown.getMessage());
+    }
+
+    @Test
+    void testCommentCreateDescriptionIsBlank() {
+        Tasks tasks = new Tasks();
+        tasks.setId(2);
+        User author = new User();
+        author.setId(4);
+        Comment comment = new Comment(author,"",2);
+        mockSecurity(4);
+        ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
+            commentService.create(comment);
+        });
+        Assertions.assertEquals(400, thrown.getStatusCode());
+        Assertions.assertEquals("Описание не передано", thrown.getMessage());
+    }
+
+    @Test
+    void testCommentCreateTaskIdNull() {
+        User author = new User();
+        author.setId(4);
+        Comment comment = new Comment(author,"Comment",null);
+        mockSecurity(4);
+        ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
+            commentService.create(comment);
+        });
+        Assertions.assertEquals(400, thrown.getStatusCode());
+        Assertions.assertEquals("Задача не передана", thrown.getMessage());
+    }
+
+    @Test
+    void testCommentCreateTaskIdNotValid() {
+        User author = new User();
+        author.setId(4);
+        Mockito.when(tasksRepository.findById(2)).thenReturn(Optional.empty());
+        Comment comment = new Comment(author,"Comment",2);
+        mockSecurity(4);
+        ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
+            commentService.create(comment);
         });
         Assertions.assertEquals(404, thrown.getStatusCode());
-        Assertions.assertEquals("Пользователь не найден", thrown.getMessage());
+        Assertions.assertEquals("Задача не найдена", thrown.getMessage());
+    }
+
+    @Test
+    void testCommentCreateSuccess() {
+        User author = new User();
+        author.setId(4);
+
+        Mockito.when(tasksRepository.existsById(2)).thenReturn(true);
+        Comment comment = new Comment(author,"Comment",2);
+        mockSecurity(4);
+        Assertions.assertDoesNotThrow(() -> {
+            commentService.create(comment);
+        });
     }
 
     private void mockSecurity(Integer currentUserIdMock) {
