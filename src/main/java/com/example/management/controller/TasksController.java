@@ -95,4 +95,13 @@ public class TasksController {
         }
         return tasksService.findTaskByAuthorSurname(userSurname, PageRequest.of(pageNum, pageSize));
     }
+
+    @Operation(
+            summary = "Change task's title, description",
+            description = "Change task's title, description by id, only for author"
+    )
+    @PutMapping(path = "task/change/{id}")
+    public void changeTask(@PathVariable Integer id, @RequestParam String title, @RequestParam String description) {
+        tasksService.changeTask(id, title, description);
+    }
 }

@@ -55,9 +55,6 @@ public class TasksService {
         if (tasks.getPriority() == null || tasks.getPriority().isBlank()) {
             throw new ApiException("Приоритет не передан", 400);
         }
-        if (!userRepository.existsById(tasks.getAuthor().getId())) {
-            throw new ApiException("Пользователь(автор) не найден", 404);
-        }
     }
 
     /**
@@ -153,6 +150,25 @@ public class TasksService {
         } else {
             return tasksRepository.findTaskByAuthorSurname(userSurname, pageable).getContent();
         }
+    }
+
+    /**
+     * Изменение заголовка и описания задачи, только для автора задачи
+     *
+     * @return измененная задача
+     */
+    public Tasks changeTask (Integer taskId, String title, String description) {
+        Optional<Tasks> task = tasksRepository.findById(taskId);
+        if (task.isEmpty()) {
+            throw new ApiException("Задача не найдена", 404);
+        }
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!currentUser.getId().equals(task.get().getAuthor().getId())) {
+            throw new ApiException("Пользователь не автор задачи", 403);
+        }
+        task.get().setTitle(title);
+        task.get().setDescription(description);
+        return tasksRepository.save(task.get());
     }
 }
 

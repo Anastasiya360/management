@@ -54,6 +54,23 @@ public class Tasks implements Serializable {
         this.status = status;
         this.priority = priority;
     }
+    public Tasks(Integer id, String title, String description, String status, String priority, User author) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.priority = priority;
+        this.author = author;
+    }
+    public Tasks(Integer id, String title, String description, String status, String priority, User author, User executor) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.priority = priority;
+        this.author = author;
+        this.executor = executor;
+    }
 
     @Transient
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
