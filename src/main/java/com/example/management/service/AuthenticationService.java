@@ -13,13 +13,11 @@ import org.springframework.stereotype.Service;
 public class AuthenticationService {
     private final UserService userService;
     private final JwtService jwtService;
-    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationService(UserService userService, JwtService jwtService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public AuthenticationService(UserService userService, JwtService jwtService, AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.jwtService = jwtService;
-        this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
     }
 

@@ -1,13 +1,10 @@
 package com.example.management.service;
 
 import com.example.management.entity.Comment;
-import com.example.management.entity.Tasks;
 import com.example.management.entity.User;
-import com.example.management.enums.Priority;
 import com.example.management.exceptoin.ApiException;
 import com.example.management.repository.CommentRepository;
 import com.example.management.repository.TasksRepository;
-import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
