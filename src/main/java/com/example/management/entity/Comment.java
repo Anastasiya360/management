@@ -39,6 +39,12 @@ public class Comment implements Serializable {
     @Column(name = "tasks_id")
     private Integer taskId;
 
+    public Comment(User author, String description, Integer taskId) {
+        this.author = author;
+        this.description = description;
+        this.taskId = taskId;
+    }
+
     @Transient
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
