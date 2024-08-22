@@ -49,7 +49,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/auth/**").permitAll()
 //                        .requestMatchers("/comment/**").permitAll()
 //                        .requestMatchers("/task/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/", "/swagger-resources/*", "/v3/api-docs/", "/").permitAll()
 //                        .requestMatchers("/endpoint", "/admin/**").hasRole("admin")
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
