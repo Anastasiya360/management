@@ -4,6 +4,7 @@ import com.example.management.entity.Comment;
 import com.example.management.entity.Tasks;
 import com.example.management.entity.User;
 import com.example.management.exceptoin.ApiException;
+import com.example.management.repository.CommentRepository;
 import com.example.management.repository.TasksRepository;
 import com.example.management.repository.UserRepository;
 import com.example.management.service.CommentService;
@@ -38,6 +39,9 @@ class ManagementApplicationTests {
 
     @MockBean
     private TasksRepository tasksRepository;
+
+    @MockBean
+    private CommentRepository commentRepository;
 
 
     @Test
