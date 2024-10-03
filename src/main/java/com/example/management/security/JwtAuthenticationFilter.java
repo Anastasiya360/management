@@ -1,7 +1,7 @@
 package com.example.management.security;
 
-import com.example.management.service.impl.JwtServiceImpl;
-import com.example.management.service.impl.UserServiceImpl;
+import com.example.management.service.JwtService;
+import com.example.management.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,8 +24,10 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer ";
     public static final String HEADER_NAME = "Authorization";
-    private final JwtServiceImpl jwtService;
-    private final UserServiceImpl userService;
+
+    private final JwtService jwtService;
+
+    private final UserService userService;
 
     @Override
     protected void doFilterInternal(

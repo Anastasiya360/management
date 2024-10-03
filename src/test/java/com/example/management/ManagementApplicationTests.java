@@ -7,9 +7,9 @@ import com.example.management.exceptoin.ApiException;
 import com.example.management.repository.CommentRepository;
 import com.example.management.repository.TasksRepository;
 import com.example.management.repository.UserRepository;
-import com.example.management.service.impl.CommentServiceImpl;
-import com.example.management.service.impl.TasksServiceImpl;
-import com.example.management.service.impl.UserServiceImpl;
+import com.example.management.service.CommentService;
+import com.example.management.service.TasksService;
+import com.example.management.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -26,13 +26,13 @@ import java.util.Optional;
 @SpringBootTest
 class ManagementApplicationTests {
     @Autowired
-    private TasksServiceImpl tasksServiceImpl;
+    private TasksService tasksService;
 
     @Autowired
-    private UserServiceImpl userService;
+    private UserService userService;
 
     @Autowired
-    private CommentServiceImpl commentServiceImpl;
+    private CommentService commentService;
 
     @MockBean
     private UserRepository userRepository;
@@ -49,7 +49,7 @@ class ManagementApplicationTests {
         Mockito.when(tasksRepository.findById(1)).thenReturn(Optional.empty());
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.deleteById(1);
+            tasksService.deleteById(1);
         });
         Assertions.assertEquals(404, thrown.getStatusCode());
         Assertions.assertEquals("Задача не найдена", thrown.getMessage());
@@ -67,7 +67,7 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.deleteById(1);
+            tasksService.deleteById(1);
         });
         Assertions.assertEquals(403, thrown.getStatusCode());
         Assertions.assertEquals("Пользователь не автор задачи", thrown.getMessage());
@@ -85,7 +85,7 @@ class ManagementApplicationTests {
         mockSecurity(1);
 
         Assertions.assertDoesNotThrow(() -> {
-            tasksServiceImpl.deleteById(6);
+            tasksService.deleteById(6);
         });
     }
 
@@ -95,7 +95,7 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.create(task);
+            tasksService.create(task);
         });
         Assertions.assertEquals(400, thrown.getStatusCode());
         Assertions.assertEquals("Заголовок не передан", thrown.getMessage());
@@ -107,7 +107,7 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.create(task);
+            tasksService.create(task);
         });
         Assertions.assertEquals(400, thrown.getStatusCode());
         Assertions.assertEquals("Заголовок не передан", thrown.getMessage());
@@ -119,7 +119,7 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.create(task);
+            tasksService.create(task);
         });
         Assertions.assertEquals(400, thrown.getStatusCode());
         Assertions.assertEquals("Описание не передано", thrown.getMessage());
@@ -131,7 +131,7 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.create(task);
+            tasksService.create(task);
         });
         Assertions.assertEquals(400, thrown.getStatusCode());
         Assertions.assertEquals("Описание не передано", thrown.getMessage());
@@ -143,7 +143,7 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.create(task);
+            tasksService.create(task);
         });
         Assertions.assertEquals(400, thrown.getStatusCode());
         Assertions.assertEquals("Приоритет не передан", thrown.getMessage());
@@ -155,7 +155,7 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.create(task);
+            tasksService.create(task);
         });
         Assertions.assertEquals(400, thrown.getStatusCode());
         Assertions.assertEquals("Приоритет не передан", thrown.getMessage());
@@ -167,7 +167,7 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.create(task);
+            tasksService.create(task);
         });
         Assertions.assertEquals(400, thrown.getStatusCode());
         Assertions.assertEquals("Приоритет задачи задан не верно", thrown.getMessage());
@@ -179,7 +179,7 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         Assertions.assertDoesNotThrow(() -> {
-            tasksServiceImpl.create(task);
+            tasksService.create(task);
         });
     }
 
@@ -188,7 +188,7 @@ class ManagementApplicationTests {
         Mockito.when(tasksRepository.findById(1)).thenReturn(Optional.empty());
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.changeStatus(1,"inProgress");
+            tasksService.changeStatus(1, "inProgress");
         });
         Assertions.assertEquals(404, thrown.getStatusCode());
         Assertions.assertEquals("Задача не найдена", thrown.getMessage());
@@ -203,7 +203,7 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.changeStatus(2,"inProgress");
+            tasksService.changeStatus(2, "inProgress");
         });
         Assertions.assertEquals(403, thrown.getStatusCode());
         Assertions.assertEquals("Пользователь не исполнитель задачи", thrown.getMessage());
@@ -218,7 +218,7 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.changeStatus(2,"low");
+            tasksService.changeStatus(2, "low");
         });
         Assertions.assertEquals(400, thrown.getStatusCode());
         Assertions.assertEquals("Статус задачи задан не верно", thrown.getMessage());
@@ -233,15 +233,16 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         Assertions.assertDoesNotThrow(() -> {
-            tasksServiceImpl.changeStatus(2, "inProgress");
+            tasksService.changeStatus(2, "inProgress");
         });
     }
+
     @Test
     void testTaskAppointmentExecutorNotFound() {
         Mockito.when(tasksRepository.findById(1)).thenReturn(Optional.empty());
         mockSecurity(12);
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.appointmentExecutor(1,12);
+            tasksService.appointmentExecutor(1, 12);
         });
         Assertions.assertEquals(404, thrown.getStatusCode());
         Assertions.assertEquals("Задача не найдена", thrown.getMessage());
@@ -258,7 +259,7 @@ class ManagementApplicationTests {
         mockSecurity(4);
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            tasksServiceImpl.appointmentExecutor(2,5);
+            tasksService.appointmentExecutor(2, 5);
         });
         Assertions.assertEquals(403, thrown.getStatusCode());
         Assertions.assertEquals("Пользователь не автор задачи", thrown.getMessage());
@@ -276,13 +277,13 @@ class ManagementApplicationTests {
         mockSecurity(12);
 
         Assertions.assertDoesNotThrow(() -> {
-            tasksServiceImpl.appointmentExecutor(2,5);
+            tasksService.appointmentExecutor(2, 5);
         });
     }
 
     @Test
     void testUserCreateNameNull() {
-        User user = new User(null,"Surname","123@gmail.com", "12345678");
+        User user = new User(null, "Surname", "123@gmail.com", "12345678");
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
             userService.create(user);
@@ -293,7 +294,7 @@ class ManagementApplicationTests {
 
     @Test
     void testUserCreateNameIsBlank() {
-        User user = new User("","Surname","123@gmail.com", "12345678");
+        User user = new User("", "Surname", "123@gmail.com", "12345678");
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
             userService.create(user);
@@ -304,7 +305,7 @@ class ManagementApplicationTests {
 
     @Test
     void testUserCreateEmailNull() {
-        User user = new User("Name","Surname",null, "12345678");
+        User user = new User("Name", "Surname", null, "12345678");
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
             userService.create(user);
@@ -315,7 +316,7 @@ class ManagementApplicationTests {
 
     @Test
     void testUserCreateEmailIsBlank() {
-        User user = new User("Name","Surname","", "12345678");
+        User user = new User("Name", "Surname", "", "12345678");
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
             userService.create(user);
@@ -326,7 +327,7 @@ class ManagementApplicationTests {
 
     @Test
     void testUserCreateEmailNotValid() {
-        User user = new User("Name","Surname","1234", "12345678");
+        User user = new User("Name", "Surname", "1234", "12345678");
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
             userService.create(user);
@@ -337,7 +338,7 @@ class ManagementApplicationTests {
 
     @Test
     void testUserCreatePasswordIsBlank() {
-        User user = new User("Name","Surname","123@gmail.com", null);
+        User user = new User("Name", "Surname", "123@gmail.com", null);
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
             userService.create(user);
@@ -348,7 +349,7 @@ class ManagementApplicationTests {
 
     @Test
     void testUserCreatePasswordNull() {
-        User user = new User("Name","Surname","123@gmail.com", "");
+        User user = new User("Name", "Surname", "123@gmail.com", "");
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
             userService.create(user);
@@ -359,7 +360,7 @@ class ManagementApplicationTests {
 
     @Test
     void testUserCreatePasswordNotValid() {
-        User user = new User("Name","Surname","123@gmail.com", "12345");
+        User user = new User("Name", "Surname", "123@gmail.com", "12345");
 
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
             userService.create(user);
@@ -395,10 +396,10 @@ class ManagementApplicationTests {
         tasks.setId(2);
         User author = new User();
         author.setId(4);
-        Comment comment = new Comment(author,null,2);
+        Comment comment = new Comment(author, null, 2);
         mockSecurity(4);
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            commentServiceImpl.create(comment);
+            commentService.create(comment);
         });
         Assertions.assertEquals(400, thrown.getStatusCode());
         Assertions.assertEquals("Описание не передано", thrown.getMessage());
@@ -410,10 +411,10 @@ class ManagementApplicationTests {
         tasks.setId(2);
         User author = new User();
         author.setId(4);
-        Comment comment = new Comment(author,"",2);
+        Comment comment = new Comment(author, "", 2);
         mockSecurity(4);
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            commentServiceImpl.create(comment);
+            commentService.create(comment);
         });
         Assertions.assertEquals(400, thrown.getStatusCode());
         Assertions.assertEquals("Описание не передано", thrown.getMessage());
@@ -423,10 +424,10 @@ class ManagementApplicationTests {
     void testCommentCreateTaskIdNull() {
         User author = new User();
         author.setId(4);
-        Comment comment = new Comment(author,"Comment",null);
+        Comment comment = new Comment(author, "Comment", null);
         mockSecurity(4);
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            commentServiceImpl.create(comment);
+            commentService.create(comment);
         });
         Assertions.assertEquals(400, thrown.getStatusCode());
         Assertions.assertEquals("Задача не передана", thrown.getMessage());
@@ -437,10 +438,10 @@ class ManagementApplicationTests {
         User author = new User();
         author.setId(4);
         Mockito.when(tasksRepository.findById(2)).thenReturn(Optional.empty());
-        Comment comment = new Comment(author,"Comment",2);
+        Comment comment = new Comment(author, "Comment", 2);
         mockSecurity(4);
         ApiException thrown = Assertions.assertThrows(ApiException.class, () -> {
-            commentServiceImpl.create(comment);
+            commentService.create(comment);
         });
         Assertions.assertEquals(404, thrown.getStatusCode());
         Assertions.assertEquals("Задача не найдена", thrown.getMessage());
@@ -452,10 +453,10 @@ class ManagementApplicationTests {
         author.setId(4);
 
         Mockito.when(tasksRepository.existsById(2)).thenReturn(true);
-        Comment comment = new Comment(author,"Comment",2);
+        Comment comment = new Comment(author, "Comment", 2);
         mockSecurity(4);
         Assertions.assertDoesNotThrow(() -> {
-            commentServiceImpl.create(comment);
+            commentService.create(comment);
         });
     }
 
