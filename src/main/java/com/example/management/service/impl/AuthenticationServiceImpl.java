@@ -1,32 +1,28 @@
-package com.example.management.service;
+package com.example.management.service.impl;
 
 import com.example.management.dto.JwtAuthenticationResponse;
 import com.example.management.dto.SignInRequest;
 import com.example.management.dto.SignUpRequest;
 import com.example.management.entity.User;
+import com.example.management.service.AuthenticationService;
+import com.example.management.service.JwtService;
+import com.example.management.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthenticationService {
+@RequiredArgsConstructor
+public class AuthenticationServiceImpl implements AuthenticationService {
+
     private final UserService userService;
+
     private final JwtService jwtService;
+
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationService(UserService userService, JwtService jwtService, AuthenticationManager authenticationManager) {
-        this.userService = userService;
-        this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
-    }
-
-    /**
-     * Регистрация пользователя
-     *
-     * @param request данные пользователя
-     * @return токен
-     */
+    @Override
     public JwtAuthenticationResponse signUp(SignUpRequest request) {
 
         User user = new User(request.getName(), request.getSurname(), request.getEmail(), request.getPassword());
@@ -37,12 +33,7 @@ public class AuthenticationService {
         return new JwtAuthenticationResponse(jwt);
     }
 
-    /**
-     * Аутентификация пользователя
-     *
-     * @param request данные пользователя
-     * @return токен
-     */
+    @Override
     public JwtAuthenticationResponse signIn(SignInRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 request.getEmail(),
